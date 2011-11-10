@@ -6,11 +6,12 @@
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 using namespace std;
 
 int main(int argc, char** argv) {
-	int limit = atoi(argv[1]);
+	int limit = atof(argv[1]);
 	bool primes[limit];
 	int end = sqrt(limit);
 
@@ -30,6 +31,8 @@ int main(int argc, char** argv) {
 
 
 	//loop for eliminating composite numbers
+	time_t startTime, endTime;
+	time(&startTime);
 	for(int i=2; i<end; i++)
 	{
 		if(primes[i])
@@ -40,12 +43,16 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
-
+	time(&endTime);
+	
 	//loop for printing the prime numbers
 	for(int i=0; i<limit; i++)
 	{
-		if(primes[i])
-		cout << i << endl;
+		if(primes[i]) 
+		{
+		//	cout << i << endl;
+		}
 	}
+	cout << "Execution time: " << difftime(endTime, startTime) << endl;
 	return 0;
 }
