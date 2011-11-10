@@ -3,6 +3,10 @@
 //may need to run mpd
 
 //#include "mpi.h"
+
+//used only for Visual C++ (Windows)
+//#include "stdafx.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
@@ -11,29 +15,40 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	int limit = atof(argv[1]);
-	bool primes[limit];
-	int end = sqrt(limit);
+	
+	const int limit = atoi(argv[1]);
+	bool* primes = new bool[limit];
+	time_t startTime, endTime;
+	
+	cout << "Execution started..." << endl;
+	
+	time(&startTime);
 
 	//loop to initialize the number array
+	//cout << "Initializing array..." << endl;
 	for(int i=0; i<limit; i++)
 	{
-		if(i>1)
+		if(i>2 && i%2 == 1)
 		{
 			primes[i] = true;
 		}
 		else
 		{
-			//TODO: get rid of this hack (0 and 1 not primes)
-			primes[i] = false;
+			if(i == 2)
+			{
+				primes[i] = true;
+			}
+			else
+			{
+				primes[i] = false;
+			}
 		}
 	}
 
 
 	//loop for eliminating composite numbers
-	time_t startTime, endTime;
-	time(&startTime);
-	for(int i=2; i<end; i++)
+	//cout << "Sieving..." << endl;
+	for(int i=3; i<sqrt((double)limit); i++)
 	{
 		if(primes[i])
 		{
@@ -44,15 +59,36 @@ int main(int argc, char** argv) {
 		}
 	}
 	time(&endTime);
+	cout << "Execution time: " << difftime(endTime, startTime) << " seconds" << endl;
 	
-	//loop for printing the prime numbers
-	for(int i=0; i<limit; i++)
+	cout << "Now printing (if anything to print)..." << endl;
+	switch(atoi(argv[2]))
 	{
-		if(primes[i]) 
-		{
-		//	cout << i << endl;
-		}
+		case 1: //print all prime numbers
+			for(int i=0; i<limit; i++)
+			{
+				if(primes[i]) 
+				{
+					cout << i << endl;
+				}
+			}
+			break;
+		case 2: //print largest prime number
+			int i = limit-1;
+			while(true)
+			{
+				if(primes[i])
+				{
+					cout << i << endl;
+					break;
+				}
+				else
+				{
+					i -= 1;
+				}
+			}
+			break;
 	}
-	cout << "Execution time: " << difftime(endTime, startTime) << endl;
+
 	return 0;
 }
