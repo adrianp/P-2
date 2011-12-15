@@ -1,94 +1,69 @@
-//compile with mpic++
-//to run use: mpirun -np <no of procs> /full/path/to/exe
-//may need to run mpd
-
-//#include "mpi.h"
-
-//used only for Visual C++ (Windows)
+//used only for Visual C++ (Visual Studio)
 //#include "stdafx.h"
 
 #include <iostream>
 #include <stdlib.h>
-#include <math.h>
+#include <math.h> //if using g++, specify use of math to the linker (-lm)
 #include <time.h>
+#include <stdio.h>
 
-using namespace std;
+int main(int argc, char** argv) 
+{
 
-int main(int argc, char** argv) {
+	if(!argv[1])
+	{
+		printf("Specify the limit as a command line argument.\n");
+		return 1;
+	}	
 	
 	const int limit = atoi(argv[1]);
-	bool* primes = new bool[limit];
+	char* primes = new char[limit];
 	time_t startTime, endTime;
-	
-	cout << "Execution started..." << endl;
-	
+	int global_count = 0;
+	int i, j;
+
 	time(&startTime);
 
 	//loop to initialize the number array
-	//cout << "Initializing array..." << endl;
-	for(int i=0; i<limit; i++)
+	for(i=0; i<limit; i++)
 	{
-		if(i>2 && i%2 == 1)
+		if(i > 1)
 		{
-			primes[i] = true;
+			primes[i] = 1;
 		}
 		else
 		{
-			if(i == 2)
-			{
-				primes[i] = true;
-			}
-			else
-			{
-				primes[i] = false;
-			}
+			primes[i] = 0;
 		}
 	}
 
 
 	//loop for eliminating composite numbers
-	//cout << "Sieving..." << endl;
-	for(int i=3; i<sqrt((double)limit); i++)
+	for(i=2; i<sqrt((double)limit); i++)
 	{
 		if(primes[i])
 		{
-			for(int j=2*i; j<limit; j+=i)
+			for(j=2*i; j<limit; j+=i)
 			{
-				primes[j] = false;
+				primes[j] = 0; 
 			}
 		}
 	}
+
 	time(&endTime);
-	cout << "Execution time: " << difftime(endTime, startTime) << " seconds" << endl;
 	
-	cout << "Now printing (if anything to print)..." << endl;
-	switch(atoi(argv[2]))
+	for(i=0; i<limit; i++)
 	{
-		case 1: //print all prime numbers
-			for(int i=0; i<limit; i++)
-			{
-				if(primes[i]) 
-				{
-					cout << i << endl;
-				}
-			}
-			break;
-		case 2: //print largest prime number
-			int i = limit-1;
-			while(true)
-			{
-				if(primes[i])
-				{
-					cout << i << endl;
-					break;
-				}
-				else
-				{
-					i -= 1;
-				}
-			}
-			break;
+		if(primes[i])
+		{
+			global_count += 1;
+		}
 	}
+	
+	free(primes);
+
+	printf("We found %d primes\n",global_count);
+	printf("Execution time: %f seconds\n", difftime(endTime, startTime));
 
 	return 0;
 }
