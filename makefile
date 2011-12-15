@@ -1,6 +1,4 @@
-all: primes
-
-primes: primes.cpp
-	mpic++ primes.cpp -lm -o primes
+all: primes_parallel.cpp
+	mpic++ primes_parallel.cpp -lm -o primes_parallel
 
 
