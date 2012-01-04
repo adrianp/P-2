@@ -1,6 +1,6 @@
 //Compile using the makefile under Linux
 
-//used only for Visual C++ (Windows)
+//used only for Visual C++ (Visual Studio)
 //#include "stdafx.h"
 
 #include <iostream>
@@ -9,37 +9,50 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "mpi.h"
+#include "mpi.h" //use mpic++ or makefile
 
 int main (int argc, char *argv[])
 {
-	const int limit = atoi(argv[1]);
 	char *primes; //processed numbers; used CHAR instead of BOOL because of MPI limitations
-	//char *all = (char*) malloc(limit); //global array
 	int local_count; //number of primes in process
-	int global_count; //global number of primes
-	int start; /* Index of first multiple */
+	int global_count; //total number of primes
+	int start; //the first composite
 	int min; //lowest value in primes[]
 	int max; //highest value in primes[]
-	int pid;
-	int index; /* Index of current prime */
+	int pid; //process ID
+	int index; //index of current prime
 	int size; //number of processes
 	int master_size; //number of elements processed by master
-	int curr_prime; /* Current prime */
+	int curr_prime; //current prime
 	int no_primes; //sizeof(primes)
 	int i, j; //counters
 	int err; //used for error codes
-	
+
 	//Initializing MPI
-	err = MPI_Init (&argc, &argv);
-	MPI_Comm_rank (MPI_COMM_WORLD, &pid);
-	MPI_Comm_size (MPI_COMM_WORLD, &size);
+	err = MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Status status;
 
+
+	if(!argv[1])
+	{
+		if(pid == 0)
+		{
+			printf("Specify the limit as a command line argument.\n");
+		}
+		MPI_Finalize();
+		return 1; //"echo $?" to get returned value
+	}
+
+	const int limit = atoi(argv[1]);
+	//char *all = (char*) malloc(limit); //global array
+
+	//start measuring execution time
 	double execution_time = -MPI_Wtime();
 
 	//Calculating the size of the chunk processed by each process
-	min = 2 + pid*(limit-1)/size;
+	min = 2 + pid*(limit-1)/size; //+2 as we check the numbers in [2,limit]
 	max = 1 + (pid+1)*(limit-1)/size;
 	no_primes = max - min + 1;
 	master_size = (limit-1)/size;
@@ -55,17 +68,17 @@ int main (int argc, char *argv[])
 			printf ("Too many processes, master will not find all the primes needed for sieving.\n");
 		}
 		MPI_Finalize();
-		return 1;
+		return 2;
 	}
 
-	//Initializing the arrays
+	//Allocating the arrays
 	primes = (char*) malloc(no_primes);
 
 	if (primes == NULL)
 	{
 		printf ("Memory allocation error.\n");
 		MPI_Finalize();
-		return 2;
+		return 3;
 	}
 
 	for(i = 0; i < no_primes; i++)
@@ -89,22 +102,19 @@ int main (int argc, char *argv[])
 		//determining where the sieving operation should start
 		if (curr_prime * curr_prime > min)
 		{
-			/*
-			Start from first unmarked yet multiple of curr_prime
-			*/
+			//Start from first unmarked yet multiple of curr_prime
 			start = curr_prime * curr_prime - min; 
 		}
 		else 
 		{
 			if (min % curr_prime == 0)
 			{
-				start = 0; //start from the first element
+				//start from the first element as min is multiple of curr_prime
+				start = 0;
 			}
 			else 
 			{
-				/*
-					start from first multiple of curr_prime
-				*/
+				//start from first multiple of curr_prime
 				start = curr_prime - (min % curr_prime);
 			}
 		}
@@ -115,22 +125,20 @@ int main (int argc, char *argv[])
 			primes[i] = 0;
 		}
 
-	
-
 		if(pid == 0) //only on master
 		{
 			//getting the next prime that will be used for sieving
-			while(!primes[++index]);
+			while(!primes[++index]) {}
 			curr_prime = index + 2;
 		}
 
-	//sending/receveing primes used for sieving, may also use MPI_Bcast
-	if(pid==0) {
+	//sending & receveing primes used for sieving
+	if(pid==0) { //send
 		for(j = 1; j<size; j++) {
 			MPI_Send(&curr_prime, 1, MPI_INT,j,1,MPI_COMM_WORLD);
 		}
 	}
-	else {
+	else { //receive
 		MPI_Recv(&curr_prime, 1, MPI_INT,0,1,MPI_COMM_WORLD, &status);
 	}
   }//end while
