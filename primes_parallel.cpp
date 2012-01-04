@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
 	The master should process all the primes used for sieving; thus, we cannot
 	have to many processes
 	*/
-	if(2 + master_size < (int) sqrt((double) limit))
+	if(2 + master_size < sqrt((double) limit))
 	{
 		if(pid == 0)
 		{
