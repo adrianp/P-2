@@ -2,7 +2,8 @@ To compile both versions (sequential/parallel) under Linux the makefile can be
 used (simply run "make" in the directory). A Visual Studio project for the 
 parallel version is also supplied.
 
-Running the applications can be done as follows (1000 is the limit):
+Running the applications can be done as follows (in these examples 1000 is the 
+limit):
 
 Sequential:
 Windows:
