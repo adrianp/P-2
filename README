@@ -1,3 +1,7 @@
+A parallel version of the Sieve of Eratosthenes implemented using MPI
+Reference: "Parallel Programming in C with MPI and OpenMP" by Michael J. Quinn
+(International Edition 2003)
+
 To compile both versions (sequential/parallel) under Linux the makefile can be 
 used (simply run "make" in the directory). A Visual Studio project for the 
 parallel version is also supplied.
